@@ -1,5 +1,9 @@
 package io.github.nataelienai.usermanager.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 import io.github.nataelienai.usermanager.dto.AddressDto;
@@ -24,5 +28,14 @@ public class AddressService {
         addressDto.getNumber(), false, person);
 
     return addressRepository.save(address);
+  }
+
+  public List<Address> findAllByPersonId(Long personId) {
+    Person person = personRepository.findById(personId)
+        .orElseThrow(() -> new PersonNotFoundException(personId));
+
+    Set<Address> addresses = person.getAddresses();
+
+    return new ArrayList<>(addresses);
   }
 }
