@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import io.github.nataelienai.usermanager.dto.PersonDto;
 import io.github.nataelienai.usermanager.entity.Person;
+import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import io.github.nataelienai.usermanager.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -21,5 +22,10 @@ public class PersonService {
 
   public List<Person> findAll() {
     return personRepository.findAll();
+  }
+
+  public Person findById(Long id) {
+    return personRepository.findById(id)
+        .orElseThrow(() -> new PersonNotFoundException(id));
   }
 }
