@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import io.github.nataelienai.usermanager.dto.PersonDto;
+import io.github.nataelienai.usermanager.dto.PersonRequest;
 import io.github.nataelienai.usermanager.entity.Person;
 import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import io.github.nataelienai.usermanager.repository.PersonRepository;
@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 public class PersonService {
   private final PersonRepository personRepository;
 
-  public Person create(PersonDto personDto) {
-    Person person = new Person(personDto.getName(), personDto.getDateOfBirth());
+  public Person create(PersonRequest personRequest) {
+    Person person = new Person(personRequest.getName(), personRequest.getDateOfBirth());
     return personRepository.save(person);
   }
 
@@ -29,12 +29,12 @@ public class PersonService {
         .orElseThrow(() -> new PersonNotFoundException(id));
   }
 
-  public Person update(Long id, PersonDto personDto) {
+  public Person update(Long id, PersonRequest personRequest) {
     Person person = personRepository.findById(id)
         .orElseThrow(() -> new PersonNotFoundException(id));
 
-    person.setName(personDto.getName());
-    person.setDateOfBirth(personDto.getDateOfBirth());
+    person.setName(personRequest.getName());
+    person.setDateOfBirth(personRequest.getDateOfBirth());
 
     return personRepository.save(person);
   }

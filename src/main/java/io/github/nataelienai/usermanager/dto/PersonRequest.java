@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonDto {
+public class PersonRequest {
   private String name;
   private LocalDate dateOfBirth;
 }
