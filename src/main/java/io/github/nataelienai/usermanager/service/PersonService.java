@@ -28,4 +28,14 @@ public class PersonService {
     return personRepository.findById(id)
         .orElseThrow(() -> new PersonNotFoundException(id));
   }
+
+  public Person update(Long id, PersonDto personDto) {
+    Person person = personRepository.findById(id)
+        .orElseThrow(() -> new PersonNotFoundException(id));
+
+    person.setName(personDto.getName());
+    person.setDateOfBirth(personDto.getDateOfBirth());
+
+    return personRepository.save(person);
+  }
 }
