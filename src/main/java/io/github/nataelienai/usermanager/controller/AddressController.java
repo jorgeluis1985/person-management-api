@@ -1,6 +1,9 @@
 package io.github.nataelienai.usermanager.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,5 +26,11 @@ public class AddressController {
   @ResponseStatus(HttpStatus.CREATED)
   public AddressResponse create(@PathVariable Long personId, @RequestBody AddressRequest addressRequest) {
     return addressService.create(personId, addressRequest);
+  }
+
+  @GetMapping
+  @ResponseStatus(HttpStatus.OK)
+  public List<AddressResponse> findAllByPersonId(@PathVariable Long personId) {
+    return addressService.findAllByPersonId(personId);
   }
 }
