@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,5 +33,11 @@ public class AddressController {
   @ResponseStatus(HttpStatus.OK)
   public List<AddressResponse> findAllByPersonId(@PathVariable Long personId) {
     return addressService.findAllByPersonId(personId);
+  }
+
+  @PatchMapping("/{addressId}/main")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void setPersonAddressAsMain(@PathVariable Long personId, @PathVariable Long addressId) {
+    addressService.setPersonAddressAsMain(personId, addressId);
   }
 }
