@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressDto {
+public class AddressRequest {
   private String cep;
   private String city;
   private String street;

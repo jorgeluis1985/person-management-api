@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import io.github.nataelienai.usermanager.dto.AddressDto;
+import io.github.nataelienai.usermanager.dto.AddressRequest;
 import io.github.nataelienai.usermanager.entity.Address;
 import io.github.nataelienai.usermanager.entity.Person;
 import io.github.nataelienai.usermanager.exception.AddressNotFoundException;
@@ -21,12 +21,12 @@ public class AddressService {
   private final AddressRepository addressRepository;
   private final PersonRepository personRepository;
 
-  public Address create(Long personId, AddressDto addressDto) {
+  public Address create(Long personId, AddressRequest addressRequest) {
     Person person = personRepository.findById(personId)
         .orElseThrow(() -> new PersonNotFoundException(personId));
 
-    Address address = new Address(addressDto.getCep(), addressDto.getCity(), addressDto.getStreet(),
-        addressDto.getNumber(), false, person);
+    Address address = new Address(addressRequest.getCep(), addressRequest.getCity(), addressRequest.getStreet(),
+        addressRequest.getNumber(), false, person);
 
     return addressRepository.save(address);
   }
