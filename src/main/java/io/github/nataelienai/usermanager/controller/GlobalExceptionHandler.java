@@ -1,6 +1,10 @@
 package io.github.nataelienai.usermanager.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +21,30 @@ public class GlobalExceptionHandler {
   public class ErrorResponse {
     private int statusCode;
     private String message;
+  }
+
+  @Getter
+  public class ValidationErrorResponse extends ErrorResponse {
+    private Map<String, String> fieldErrors;
+
+    public ValidationErrorResponse(int statusCode, Map<String, String> fieldErrors) {
+      super(statusCode, "Validation failed");
+      this.fieldErrors = fieldErrors;
+    }
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ValidationErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
+    Map<String, String> fieldErrors = new HashMap<>();
+
+    exception.getFieldErrors().forEach(fieldError -> {
+      String fieldName = fieldError.getField();
+      String errorMessage = fieldError.getDefaultMessage();
+      fieldErrors.put(fieldName, errorMessage);
+    });
+
+    return new ValidationErrorResponse(HttpStatus.BAD_REQUEST.value(), fieldErrors);
   }
 
   @ExceptionHandler({
