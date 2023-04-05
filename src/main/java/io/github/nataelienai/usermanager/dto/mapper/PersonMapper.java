@@ -1,5 +1,6 @@
 package io.github.nataelienai.usermanager.dto.mapper;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,17 +12,17 @@ public class PersonMapper {
   private PersonMapper() {
   }
 
-  public static PersonResponse mapToResponse(Person person) {
+  public static PersonResponse mapToResponse(Person person, DateTimeFormatter formatter) {
     return new PersonResponse(
         person.getId(),
         person.getName(),
-        person.getDateOfBirth(),
+        person.getDateOfBirth().format(formatter),
         AddressMapper.mapToResponseList(person.getAddresses()));
   }
 
-  public static List<PersonResponse> mapToResponseList(Collection<Person> people) {
+  public static List<PersonResponse> mapToResponseList(Collection<Person> people, DateTimeFormatter formatter) {
     return people.stream()
-        .map(PersonMapper::mapToResponse)
+        .map(person -> mapToResponse(person, formatter))
         .collect(Collectors.toList());
   }
 }

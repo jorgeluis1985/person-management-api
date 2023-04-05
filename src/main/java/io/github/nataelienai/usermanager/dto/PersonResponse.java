@@ -1,6 +1,5 @@
 package io.github.nataelienai.usermanager.dto;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -15,6 +14,6 @@ import lombok.NoArgsConstructor;
 public class PersonResponse {
   private Long id;
   private String name;
-  private LocalDate dateOfBirth;
+  private String dateOfBirth;
   private List<AddressResponse> addresses;
 }
