@@ -2,6 +2,8 @@ package io.github.nataelienai.usermanager.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,7 +27,7 @@ public class AddressController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public AddressResponse create(@PathVariable Long personId, @RequestBody AddressRequest addressRequest) {
+  public AddressResponse create(@PathVariable Long personId, @Valid @RequestBody AddressRequest addressRequest) {
     return addressService.create(personId, addressRequest);
   }
 
