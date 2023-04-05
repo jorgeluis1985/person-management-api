@@ -163,4 +163,85 @@ class PersonServiceTest {
         .isEqualTo(person);
     assertThat(personResponse.getDateOfBirth()).isEqualTo(dateOfBirth);
   }
+
+  @Test
+  @DisplayName("update() should throw when person id does not exist")
+  void update_shouldThrow_whenPersonIdDoesNotExist() {
+    // given
+    Long id = 1L;
+    PersonRequest personRequest = new PersonRequest("john doe", "2000-01-01");
+    given(personRepository.findById(id)).willReturn(Optional.empty());
+
+    // when
+    // then
+    assertThatThrownBy(() -> personService.update(id, personRequest))
+        .isInstanceOf(PersonNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("update() should throw when given an invalid date of birth")
+  void update_shouldThrow_whenGivenInvalidDateOfBirth() {
+    // given
+    Long id = 1L;
+    PersonRequest personRequest = new PersonRequest("john doe", "2000-99-01");
+    Person person = new Person();
+    Address address = new Address();
+
+    person.setId(id);
+    person.setName("John Doe");
+    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+    person.setAddresses(Set.of(address));
+
+    address.setId(1L);
+    address.setCep("12345-123");
+    address.setCity("City");
+    address.setStreet("Street");
+    address.setNumber(10);
+    address.setMain(true);
+    address.setPerson(person);
+
+    given(personRepository.findById(id)).willReturn(Optional.of(person));
+
+    // when
+    // then
+    assertThatThrownBy(() -> personService.update(id, personRequest))
+        .isInstanceOf(DateOfBirthParseException.class);
+  }
+
+  @Test
+  @DisplayName("update() should update person when given an existent id and a valid person request")
+  void update_shouldUpdatePerson_whenGivenExistentIdAndValidPersonRequest() {
+    // given
+    Long id = 1L;
+    PersonRequest personRequest = new PersonRequest("new john doe", "2001-02-02");
+    Person person = new Person();
+    Address address = new Address();
+
+    person.setId(id);
+    person.setName("John Doe");
+    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+    person.setAddresses(Set.of(address));
+
+    address.setId(1L);
+    address.setCep("12345-123");
+    address.setCity("City");
+    address.setStreet("Street");
+    address.setNumber(10);
+    address.setMain(true);
+    address.setPerson(person);
+
+    given(personRepository.findById(id)).willReturn(Optional.of(person));
+    given(personRepository.save(any(Person.class))).will(returnsFirstArg());
+
+    // when
+    PersonResponse personResponse = personService.update(id, personRequest);
+
+    // then
+    assertThat(personResponse)
+        .usingRecursiveComparison()
+        .ignoringFields("name", "dateOfBirth")
+        .isEqualTo(person);
+    assertThat(personResponse.getName()).isEqualTo(personRequest.getName());
+    assertThat(personResponse.getDateOfBirth()).isEqualTo(personRequest.getDateOfBirth());
+  }
 }
