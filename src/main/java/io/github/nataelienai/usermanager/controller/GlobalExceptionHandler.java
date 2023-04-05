@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
       super(statusCode, "Validation failed");
       this.fieldErrors = fieldErrors;
     }
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+    return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "JSON request body has an invalid format");
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
