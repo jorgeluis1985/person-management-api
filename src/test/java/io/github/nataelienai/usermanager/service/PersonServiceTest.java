@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.then;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import io.github.nataelienai.usermanager.dto.PersonResponse;
 import io.github.nataelienai.usermanager.entity.Address;
 import io.github.nataelienai.usermanager.entity.Person;
 import io.github.nataelienai.usermanager.exception.DateOfBirthParseException;
+import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import io.github.nataelienai.usermanager.repository.PersonRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -112,5 +114,53 @@ class PersonServiceTest {
         .ignoringFields("dateOfBirth")
         .isEqualTo(person);
     assertThat(personResponses.get(0).getDateOfBirth()).isEqualTo(dateOfBirth);
+  }
+
+  @Test
+  @DisplayName("findById() should throw when person id does not exist")
+  void findById_shouldThrow_whenPersonIdDoesNotExist() {
+    // given
+    Long id = 1L;
+    given(personRepository.findById(id)).willReturn(Optional.empty());
+
+    // when
+    // then
+    assertThatThrownBy(() -> personService.findById(id))
+        .isInstanceOf(PersonNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("findById() should retrieve person when id exists")
+  void findById_shouldRetrievePerson_whenIdExists() {
+    // given
+    Long id = 1L;
+    String dateOfBirth = "2000-01-01";
+    Person person = new Person();
+    Address address = new Address();
+
+    person.setId(1L);
+    person.setName("John Doe");
+    person.setDateOfBirth(LocalDate.parse(dateOfBirth, DATE_FORMATTER));
+    person.setAddresses(Set.of(address));
+
+    address.setId(1L);
+    address.setCep("12345-123");
+    address.setCity("City");
+    address.setStreet("Street");
+    address.setNumber(10);
+    address.setMain(true);
+    address.setPerson(person);
+
+    given(personRepository.findById(id)).willReturn(Optional.of(person));
+
+    // when
+    PersonResponse personResponse = personService.findById(id);
+
+    // then
+    assertThat(personResponse)
+        .usingRecursiveComparison()
+        .ignoringFields("dateOfBirth")
+        .isEqualTo(person);
+    assertThat(personResponse.getDateOfBirth()).isEqualTo(dateOfBirth);
   }
 }
