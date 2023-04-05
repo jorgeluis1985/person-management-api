@@ -9,7 +9,9 @@ import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -87,5 +89,45 @@ class AddressServiceTest {
         .ignoringFields("id", "main")
         .isEqualTo(addressRequest);
     assertThat(addressResponse.getMain()).isFalse();
+  }
+
+  @Test
+  @DisplayName("findAllByPersonId() should throw when person id does not exist")
+  void findAllByPersonId_shouldThrow_whenPersonIdDoesNotExist() {
+    // given
+    Long personId = 1L;
+    given(personRepository.findById(personId)).willReturn(Optional.empty());
+
+    // when
+    // then
+    assertThatThrownBy(() -> addressService.findAllByPersonId(personId))
+        .isInstanceOf(PersonNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("findAllByPersonId() should retrieve a person's addresses when their id exists")
+  void findAllByPersonId_shouldRetrievePersonAddresses_whenTheirIdExists() {
+    // given
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    Long personId = 1L;
+    Person person = new Person();
+    person.setId(personId);
+    person.setName("Kendrick Lamar");
+    person.setDateOfBirth(LocalDate.parse("2000-01-01", formatter));
+
+    Address address = new Address(1L, "12345-123", "City", "Street", 10, true, person);
+
+    person.setAddresses(Set.of(address));
+    given(personRepository.findById(personId)).willReturn(Optional.of(person));
+
+    // when
+    List<AddressResponse> addressResponses = addressService.findAllByPersonId(personId);
+
+    // then
+    assertThat(addressResponses).isNotEmpty();
+    assertThat(addressResponses.get(0))
+        .usingRecursiveComparison()
+        .ignoringFields("person")
+        .isEqualTo(address);
   }
 }
