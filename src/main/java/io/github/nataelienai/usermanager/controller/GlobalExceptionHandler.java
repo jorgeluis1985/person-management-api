@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import io.github.nataelienai.usermanager.exception.AddressNotFoundException;
+import io.github.nataelienai.usermanager.exception.DateOfBirthParseException;
 import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +46,12 @@ public class GlobalExceptionHandler {
     });
 
     return new ValidationErrorResponse(HttpStatus.BAD_REQUEST.value(), fieldErrors);
+  }
+
+  @ExceptionHandler(DateOfBirthParseException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleDateOfBirthParseException(DateOfBirthParseException exception) {
+    return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
   }
 
   @ExceptionHandler({
