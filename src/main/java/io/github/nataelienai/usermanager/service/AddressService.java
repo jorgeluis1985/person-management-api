@@ -58,7 +58,7 @@ public class AddressService {
     }
 
     if (!addressFound) {
-      throw new AddressNotFoundException(addressId);
+      throw new AddressNotFoundException(addressId, personId);
     }
 
     addressRepository.saveAll(addresses);
