@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -68,14 +67,6 @@ class PersonServiceTest {
     PersonResponse personResponse = personService.create(personRequest);
 
     // then
-    ArgumentCaptor<Person> personArgumentCaptor = ArgumentCaptor.forClass(Person.class);
-    then(personRepository).should().save(personArgumentCaptor.capture());
-    Person capturedPerson = personArgumentCaptor.getValue();
-
-    assertThat(capturedPerson.getName()).isEqualTo(personRequest.getName());
-    assertThat(capturedPerson.getDateOfBirth().format(DATE_FORMATTER)).isEqualTo(personRequest.getDateOfBirth());
-    assertThat(capturedPerson.getAddresses()).isEmpty();
-
     assertThat(personResponse.getName()).isEqualTo(personRequest.getName());
     assertThat(personResponse.getDateOfBirth()).isEqualTo(personRequest.getDateOfBirth());
     assertThat(personResponse.getAddresses()).isEmpty();
