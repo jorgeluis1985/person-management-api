@@ -2,6 +2,8 @@ package io.github.nataelienai.usermanager.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +27,7 @@ public class PersonController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public PersonResponse create(@RequestBody PersonRequest personRequest) {
+  public PersonResponse create(@Valid @RequestBody PersonRequest personRequest) {
     return personService.create(personRequest);
   }
 
@@ -43,7 +45,7 @@ public class PersonController {
 
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public PersonResponse update(@PathVariable Long id, @RequestBody PersonRequest personRequest) {
+  public PersonResponse update(@PathVariable Long id, @Valid @RequestBody PersonRequest personRequest) {
     return personService.update(id, personRequest);
   }
 }
