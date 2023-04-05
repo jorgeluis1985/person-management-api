@@ -2,6 +2,7 @@ package io.github.nataelienai.usermanager.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import io.github.nataelienai.usermanager.dto.PersonRequest;
 import io.github.nataelienai.usermanager.dto.PersonResponse;
 import io.github.nataelienai.usermanager.dto.mapper.PersonMapper;
 import io.github.nataelienai.usermanager.entity.Person;
+import io.github.nataelienai.usermanager.exception.DateOfBirthParseException;
 import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import io.github.nataelienai.usermanager.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +50,12 @@ public class PersonService {
   }
 
   private LocalDate parseDateOfBirth(String dateOfBirth) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    return LocalDate.parse(dateOfBirth, formatter);
+    String datePattern = "yyyy-MM-dd";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(datePattern);
+    try {
+      return LocalDate.parse(dateOfBirth, formatter);
+    } catch (DateTimeParseException exception) {
+      throw new DateOfBirthParseException(datePattern);
+    }
   }
 }
