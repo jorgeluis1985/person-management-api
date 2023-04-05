@@ -1,6 +1,7 @@
 package io.github.nataelienai.usermanager.entity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -30,7 +31,7 @@ public class Person {
   private LocalDate dateOfBirth;
 
   @OneToMany(mappedBy = "person")
-  private Set<Address> addresses;
+  private Set<Address> addresses = new HashSet<>();
 
   public Person(String name, LocalDate dateOfBirth) {
     this.name = name;
