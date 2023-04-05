@@ -76,22 +76,8 @@ class PersonServiceTest {
   @DisplayName("findAll() should retrieve all people")
   void findAll_shouldRetrieveAllPeople() {
     // given
-    String dateOfBirth = "2000-01-01";
-    Person person = new Person();
-    Address address = new Address();
-
-    person.setId(1L);
-    person.setName("John Doe");
-    person.setDateOfBirth(LocalDate.parse(dateOfBirth, DATE_FORMATTER));
-    person.setAddresses(Set.of(address));
-
-    address.setId(1L);
-    address.setCep("12345-123");
-    address.setCity("City");
-    address.setStreet("Street");
-    address.setNumber(10);
-    address.setMain(true);
-    address.setPerson(person);
+    Person person = createPersonWithAddress();
+    String dateOfBirth = person.getDateOfBirth().format(DATE_FORMATTER);
 
     given(personRepository.findAll()).willReturn(List.of(person));
 
@@ -124,23 +110,9 @@ class PersonServiceTest {
   @DisplayName("findById() should retrieve person when id exists")
   void findById_shouldRetrievePerson_whenIdExists() {
     // given
-    Long id = 1L;
-    String dateOfBirth = "2000-01-01";
-    Person person = new Person();
-    Address address = new Address();
-
-    person.setId(1L);
-    person.setName("John Doe");
-    person.setDateOfBirth(LocalDate.parse(dateOfBirth, DATE_FORMATTER));
-    person.setAddresses(Set.of(address));
-
-    address.setId(1L);
-    address.setCep("12345-123");
-    address.setCity("City");
-    address.setStreet("Street");
-    address.setNumber(10);
-    address.setMain(true);
-    address.setPerson(person);
+    Person person = createPersonWithAddress();
+    Long id = person.getId();
+    String dateOfBirth = person.getDateOfBirth().format(DATE_FORMATTER);
 
     given(personRepository.findById(id)).willReturn(Optional.of(person));
 
@@ -173,23 +145,9 @@ class PersonServiceTest {
   @DisplayName("update() should throw when given an invalid date of birth")
   void update_shouldThrow_whenGivenInvalidDateOfBirth() {
     // given
-    Long id = 1L;
     PersonRequest personRequest = new PersonRequest("john doe", "2000-99-01");
-    Person person = new Person();
-    Address address = new Address();
-
-    person.setId(id);
-    person.setName("John Doe");
-    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
-    person.setAddresses(Set.of(address));
-
-    address.setId(1L);
-    address.setCep("12345-123");
-    address.setCity("City");
-    address.setStreet("Street");
-    address.setNumber(10);
-    address.setMain(true);
-    address.setPerson(person);
+    Person person = createPersonWithAddress();
+    Long id = person.getId();
 
     given(personRepository.findById(id)).willReturn(Optional.of(person));
 
@@ -203,23 +161,9 @@ class PersonServiceTest {
   @DisplayName("update() should update person when given an existent id and a valid person request")
   void update_shouldUpdatePerson_whenGivenExistentIdAndValidPersonRequest() {
     // given
-    Long id = 1L;
     PersonRequest personRequest = new PersonRequest("new john doe", "2001-02-02");
-    Person person = new Person();
-    Address address = new Address();
-
-    person.setId(id);
-    person.setName("John Doe");
-    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
-    person.setAddresses(Set.of(address));
-
-    address.setId(1L);
-    address.setCep("12345-123");
-    address.setCity("City");
-    address.setStreet("Street");
-    address.setNumber(10);
-    address.setMain(true);
-    address.setPerson(person);
+    Person person = createPersonWithAddress();
+    Long id = person.getId();
 
     given(personRepository.findById(id)).willReturn(Optional.of(person));
     given(personRepository.save(any(Person.class))).will(returnsFirstArg());
@@ -234,5 +178,25 @@ class PersonServiceTest {
         .isEqualTo(person);
     assertThat(personResponse.getName()).isEqualTo(personRequest.getName());
     assertThat(personResponse.getDateOfBirth()).isEqualTo(personRequest.getDateOfBirth());
+  }
+
+  Person createPersonWithAddress() {
+    Person person = new Person();
+    person.setId(1L);
+    person.setName("John Doe");
+    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+
+    Address address = new Address();
+    address.setId(1L);
+    address.setCep("12345-123");
+    address.setCity("City");
+    address.setStreet("Street");
+    address.setNumber(10);
+    address.setMain(true);
+
+    person.setAddresses(Set.of(address));
+    address.setPerson(person);
+
+    return person;
   }
 }
