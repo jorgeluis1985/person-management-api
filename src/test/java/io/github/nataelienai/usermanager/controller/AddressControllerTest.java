@@ -1,14 +1,17 @@
 package io.github.nataelienai.usermanager.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +27,7 @@ import io.github.nataelienai.usermanager.dto.AddressRequest;
 import io.github.nataelienai.usermanager.dto.AddressResponse;
 import io.github.nataelienai.usermanager.dto.ErrorResponse;
 import io.github.nataelienai.usermanager.dto.ValidationErrorResponse;
+import io.github.nataelienai.usermanager.exception.AddressNotFoundException;
 import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import io.github.nataelienai.usermanager.service.AddressService;
 
@@ -148,6 +152,64 @@ class AddressControllerTest {
     // when
     // then
     mockMvc.perform(get("/people/{personId}/addresses", personId))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("PATCH /people/{personId}/addresses/{addressId}/main should return 204 when given valid person and address ids")
+  void setPersonAddressAsMain_shouldReturn204_whenGivenValidPersonAndAddressIds() throws Exception {
+    // given
+    Long personId = 1L;
+    Long addressId = 1L;
+    willDoNothing().given(addressService).setPersonAddressAsMain(personId, addressId);
+
+    // when
+    // then
+    mockMvc.perform(patch("/people/{personId}/addresses/{addressId}/main", personId, addressId))
+        .andExpect(status().isNoContent());
+
+    then(addressService).should().setPersonAddressAsMain(personId, addressId);
+  }
+
+  @Test
+  @DisplayName("PATCH /people/{personId}/addresses/{addressId}/main should return 404 when person id does not exist")
+  void setPersonAddressAsMain_shouldReturn404_whenPersonIdDoesNotExist() throws Exception {
+    // given
+    Long personId = 1L;
+    Long addressId = 1L;
+    PersonNotFoundException exception = new PersonNotFoundException(personId);
+    ErrorResponse errorResponse = new ErrorResponse(404, exception.getMessage());
+
+    willThrow(exception).given(addressService).setPersonAddressAsMain(personId, addressId);
+
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(patch("/people/{personId}/addresses/{addressId}/main", personId, addressId))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("PATCH /people/{personId}/addresses/{addressId}/main should return 404 when address id does not exist")
+  void setPersonAddressAsMain_shouldReturn404_whenAddressIdDoesNotExist() throws Exception {
+    // given
+    Long personId = 1L;
+    Long addressId = 1L;
+    AddressNotFoundException exception = new AddressNotFoundException(personId, addressId);
+    ErrorResponse errorResponse = new ErrorResponse(404, exception.getMessage());
+
+    willThrow(exception).given(addressService).setPersonAddressAsMain(personId, addressId);
+
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(patch("/people/{personId}/addresses/{addressId}/main", personId, addressId))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(errorResponseJson));
