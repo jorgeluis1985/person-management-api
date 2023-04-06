@@ -71,11 +71,8 @@ class AddressServiceTest {
   @DisplayName("create() should save address when given a valid address request")
   void create_shouldSaveAddress_whenGivenValidAddressRequest() {
     // given
-    Long personId = 1L;
-    Person person = new Person();
-    person.setId(personId);
-    person.setName("Kendrick Lamar");
-    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+    Person person = createPerson();
+    Long personId = person.getId();
     AddressRequest addressRequest = new AddressRequest("12345-123", "City", "Street", 10);
 
     given(personRepository.findById(personId)).willReturn(Optional.of(person));
@@ -115,15 +112,10 @@ class AddressServiceTest {
   @DisplayName("findAllByPersonId() should retrieve a person's addresses when their id exists")
   void findAllByPersonId_shouldRetrievePersonAddresses_whenTheirIdExists() {
     // given
-    Long personId = 1L;
-    Person person = new Person();
-    person.setId(personId);
-    person.setName("Kendrick Lamar");
-    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+    Person person = createPerson();
+    Long personId = person.getId();
+    Address address = createAddress(1L, person);
 
-    Address address = new Address(1L, "12345-123", "City", "Street", 10, true, person);
-
-    person.setAddresses(Set.of(address));
     given(personRepository.findById(personId)).willReturn(Optional.of(person));
 
     // when
@@ -142,12 +134,11 @@ class AddressServiceTest {
   void setPersonAddressAsMain_shouldThrow_whenPersonIdDoesNotExist() {
     // given
     Long personId = 1L;
-    Long addressId = 1L;
     given(personRepository.findById(personId)).willReturn(Optional.empty());
 
     // when
     // then
-    assertThatThrownBy(() -> addressService.setPersonAddressAsMain(personId, addressId))
+    assertThatThrownBy(() -> addressService.setPersonAddressAsMain(personId, 1L))
         .isInstanceOf(PersonNotFoundException.class);
   }
 
@@ -155,17 +146,13 @@ class AddressServiceTest {
   @DisplayName("setPersonAddressAsMain() should throw when person does not have the address")
   void setPersonAddressAsMain_shouldThrow_whenPersonDoesNotHaveAddress() {
     // given
-    Long personId = 1L;
-    Long addressId = 1L;
-    Person person = new Person();
-    person.setId(personId);
-    person.setName("Kendrick Lamar");
-    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+    Person person = createPerson();
+    Long personId = person.getId();
     given(personRepository.findById(personId)).willReturn(Optional.of(person));
 
     // when
     // then
-    assertThatThrownBy(() -> addressService.setPersonAddressAsMain(personId, addressId))
+    assertThatThrownBy(() -> addressService.setPersonAddressAsMain(personId, 1L))
         .isInstanceOf(AddressNotFoundException.class);
   }
 
@@ -173,17 +160,11 @@ class AddressServiceTest {
   @DisplayName("setPersonAddressAsMain() should set address as main when person and address ids exist")
   void setPersonAddressAsMain_shouldSetAddressAsMain_whenPersonAndAddressIdsExist() {
     // given
-    Long personId = 1L;
     Long addressId = 1L;
-    Person person = new Person();
-    person.setId(personId);
-    person.setName("Kendrick Lamar");
-    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
-
-    Set<Address> addresses = Set.of(
-        new Address(addressId, "12345-123", "City", "Street", 10, false, person),
-        new Address(2L, "12345-123", "City", "Street", 10, true, person));
-    person.setAddresses(addresses);
+    Person person = createPerson();
+    createAddress(addressId, person);
+    createAddress(addressId + 1, person);
+    Long personId = person.getId();
 
     given(personRepository.findById(personId)).willReturn(Optional.of(person));
     given(addressRepository.saveAll(anyIterable())).willReturn(List.of());
@@ -200,7 +181,7 @@ class AddressServiceTest {
         .usingRecursiveComparison()
         .ignoringCollectionOrder()
         .ignoringFields("main")
-        .isEqualTo(addresses);
+        .isEqualTo(person.getAddresses());
 
     for (Address address : capturedAddresses) {
       if (addressId == address.getId()) {
@@ -209,5 +190,21 @@ class AddressServiceTest {
         assertThat(address.getMain()).isFalse();
       }
     }
+  }
+
+  Address createAddress(Long id, Person person) {
+    Address address = new Address(id, "12345-123", "City", "Street", 10, false, person);
+    person.getAddresses().add(address);
+
+    return address;
+  }
+
+  Person createPerson() {
+    Person person = new Person();
+    person.setId(1L);
+    person.setName("Kendrick Lamar");
+    person.setDateOfBirth(LocalDate.parse("2000-01-01", DATE_FORMATTER));
+
+    return person;
   }
 }
