@@ -25,6 +25,7 @@ import io.github.nataelienai.usermanager.dto.PersonRequest;
 import io.github.nataelienai.usermanager.dto.PersonResponse;
 import io.github.nataelienai.usermanager.dto.ValidationErrorResponse;
 import io.github.nataelienai.usermanager.exception.DateOfBirthParseException;
+import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
 import io.github.nataelienai.usermanager.service.PersonService;
 
 @WebMvcTest(PersonController.class)
@@ -126,5 +127,46 @@ class PersonControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(personResponsesJson));
+  }
+
+  @Test
+  @DisplayName("GET /people/{personId} should return 200 and person when person id exists")
+  void findById_shouldReturn200AndPerson_whenPersonIdExists() throws Exception {
+    // given
+    List<AddressResponse> addressResponses = List.of(
+        new AddressResponse(1L, "12325-123", "city", "street", 10, false));
+    Long personId = 1L;
+    PersonResponse personResponse = new PersonResponse(personId, "John Doe", "2000-01-01", addressResponses);
+
+    given(personService.findById(personId)).willReturn(personResponse);
+
+    String personResponseJson = objectMapper.writeValueAsString(personResponse);
+
+    // when
+    // then
+    mockMvc.perform(get("/people/{personId}", personId))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(personResponseJson));
+  }
+
+  @Test
+  @DisplayName("GET /people/{personId} should return 404 when person id does not exist")
+  void findById_shouldReturn404_whenPersonIdDoesNotExist() throws Exception {
+    // given
+    Long personId = 1L;
+    PersonNotFoundException exception = new PersonNotFoundException(personId);
+    ErrorResponse errorResponse = new ErrorResponse(404, exception.getMessage());
+
+    given(personService.findById(personId)).willThrow(exception);
+
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(get("/people/{personId}", personId))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
   }
 }
