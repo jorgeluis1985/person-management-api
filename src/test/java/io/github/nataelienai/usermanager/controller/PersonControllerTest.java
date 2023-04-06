@@ -3,6 +3,7 @@ package io.github.nataelienai.usermanager.controller;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -165,6 +166,101 @@ class PersonControllerTest {
     // when
     // then
     mockMvc.perform(get("/people/{personId}", personId))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("PUT /people/{personId} should return 200 and person when given valid person and id")
+  void update_shouldReturn200AndPerson_whenGivenValidPersonAndId() throws Exception {
+    // given
+    Long personId = 1L;
+    PersonRequest personRequest = new PersonRequest("John Doe", "2000-01-01");
+    PersonResponse personResponse = new PersonResponse(personId, "John Doe", "2000-01-01", List.of());
+
+    given(personService.update(personId, personRequest)).willReturn(personResponse);
+
+    String personRequestJson = objectMapper.writeValueAsString(personRequest);
+    String personResponseJson = objectMapper.writeValueAsString(personResponse);
+
+    // when
+    // then
+    mockMvc.perform(put("/people/{personId}", personId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(personRequestJson))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(personResponseJson));
+  }
+
+  @Test
+  @DisplayName("PUT /people/{personId} should return 400 when given invalid person")
+  void update_shouldReturn400_whenGivenInvalidPerson() throws Exception {
+    // given
+    PersonRequest personRequest = new PersonRequest(null, null);
+
+    Map<String, String> fieldErrors = Map.of(
+        "name", "Name is required",
+        "dateOfBirth", "Date of birth is required");
+    ValidationErrorResponse errorResponse = new ValidationErrorResponse(400, fieldErrors);
+
+    String personRequestJson = objectMapper.writeValueAsString(personRequest);
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(put("/people/{personId}", 1L)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(personRequestJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("PUT /people/{personId} should return 400 when given invalid date of birth")
+  void update_shouldReturn400_whenGivenInvalidDateOfBirth() throws Exception {
+    // given
+    Long personId = 1L;
+    PersonRequest personRequest = new PersonRequest("John Doe", "2000-01-32");
+    DateOfBirthParseException exception = new DateOfBirthParseException("yyyy-MM-dd");
+    ErrorResponse errorResponse = new ErrorResponse(400, exception.getMessage());
+
+    given(personService.update(personId, personRequest)).willThrow(exception);
+
+    String personRequestJson = objectMapper.writeValueAsString(personRequest);
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(put("/people/{personId}", personId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(personRequestJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("PUT /people/{personId} should return 404 when person id does not exist")
+  void update_shouldReturn404_whenPersonIdDoesNotExist() throws Exception {
+    // given
+    Long personId = 1L;
+    PersonRequest personRequest = new PersonRequest("John Doe", "2000-01-01");
+    PersonNotFoundException exception = new PersonNotFoundException(personId);
+    ErrorResponse errorResponse = new ErrorResponse(404, exception.getMessage());
+
+    given(personService.update(personId, personRequest)).willThrow(exception);
+
+    String personRequestJson = objectMapper.writeValueAsString(personRequest);
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(put("/people/{personId}", personId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(personRequestJson))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(errorResponseJson));
