@@ -17,17 +17,20 @@ import io.github.nataelienai.usermanager.dto.ValidationErrorResponse;
 import io.github.nataelienai.usermanager.exception.AddressNotFoundException;
 import io.github.nataelienai.usermanager.exception.DateOfBirthParseException;
 import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
+import io.swagger.v3.oas.annotations.Hidden;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
   private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+  @Hidden
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
     return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "JSON request body has an invalid format");
   }
 
+  @Hidden
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ValidationErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
@@ -42,12 +45,14 @@ public class GlobalExceptionHandler {
     return new ValidationErrorResponse(HttpStatus.BAD_REQUEST.value(), fieldErrors);
   }
 
+  @Hidden
   @ExceptionHandler(DateOfBirthParseException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorResponse handleDateOfBirthParseException(DateOfBirthParseException exception) {
     return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
   }
 
+  @Hidden
   @ExceptionHandler({
       PersonNotFoundException.class,
       AddressNotFoundException.class
@@ -57,6 +62,7 @@ public class GlobalExceptionHandler {
     return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
   }
 
+  @Hidden
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ErrorResponse handleUncaughtException(Exception exception) {
