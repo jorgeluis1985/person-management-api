@@ -1,6 +1,7 @@
 package io.github.nataelienai.usermanager.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.github.nataelienai.usermanager.dto.AddressResponse;
 import io.github.nataelienai.usermanager.dto.ErrorResponse;
 import io.github.nataelienai.usermanager.dto.PersonRequest;
 import io.github.nataelienai.usermanager.dto.PersonResponse;
@@ -103,5 +105,26 @@ class PersonControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("GET /people should return 200 and all people")
+  void findAll_shouldReturn200AndAllPeople() throws Exception {
+    // given
+    List<AddressResponse> addressResponses = List.of(
+        new AddressResponse(1L, "12325-123", "city", "street", 10, false));
+    List<PersonResponse> personResponses = List.of(
+        new PersonResponse(1L, "John Doe", "2000-01-01", addressResponses));
+
+    given(personService.findAll()).willReturn(personResponses);
+
+    String personResponsesJson = objectMapper.writeValueAsString(personResponses);
+
+    // when
+    // then
+    mockMvc.perform(get("/people"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(personResponsesJson));
   }
 }
