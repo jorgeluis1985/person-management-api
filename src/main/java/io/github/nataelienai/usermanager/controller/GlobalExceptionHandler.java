@@ -12,32 +12,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import io.github.nataelienai.usermanager.dto.ErrorResponse;
+import io.github.nataelienai.usermanager.dto.ValidationErrorResponse;
 import io.github.nataelienai.usermanager.exception.AddressNotFoundException;
 import io.github.nataelienai.usermanager.exception.DateOfBirthParseException;
 import io.github.nataelienai.usermanager.exception.PersonNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
   private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-  @Getter
-  @AllArgsConstructor
-  public class ErrorResponse {
-    private int statusCode;
-    private String message;
-  }
-
-  @Getter
-  public class ValidationErrorResponse extends ErrorResponse {
-    private Map<String, String> fieldErrors;
-
-    public ValidationErrorResponse(int statusCode, Map<String, String> fieldErrors) {
-      super(statusCode, "Validation failed");
-      this.fieldErrors = fieldErrors;
-    }
-  }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
