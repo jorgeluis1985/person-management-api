@@ -1,9 +1,11 @@
 package io.github.nataelienai.usermanager.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -105,6 +107,47 @@ class AddressControllerTest {
     mockMvc.perform(post("/people/{personId}/addresses", personId)
         .contentType(MediaType.APPLICATION_JSON)
         .content(addressRequestJson))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(errorResponseJson));
+  }
+
+  @Test
+  @DisplayName("GET /people/{personId}/addresses should return 200 and addresses when given valid person id")
+  void findAllByPersonId_shouldReturn200AndAddresses_whenGivenValidPersonId() throws Exception {
+    // given
+    Long personId = 1L;
+    List<AddressResponse> addressResponses = List.of(
+        new AddressResponse(1L, "12345-123", "City", "Street", 10, false),
+        new AddressResponse(2L, "12345-124", "City 2", "Street 2", 11, false));
+
+    given(addressService.findAllByPersonId(personId)).willReturn(addressResponses);
+
+    String addressResponseJson = objectMapper.writeValueAsString(addressResponses);
+
+    // when
+    // then
+    mockMvc.perform(get("/people/{personId}/addresses", personId))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(addressResponseJson));
+  }
+
+  @Test
+  @DisplayName("GET /people/{personId}/addresses should return 404 when person id does not exist")
+  void findAllByPersonId_shouldReturn404_whenPersonIdDoesNotExist() throws Exception {
+    // given
+    Long personId = 1L;
+    PersonNotFoundException exception = new PersonNotFoundException(personId);
+    ErrorResponse errorResponse = new ErrorResponse(404, exception.getMessage());
+
+    given(addressService.findAllByPersonId(personId)).willThrow(exception);
+
+    String errorResponseJson = objectMapper.writeValueAsString(errorResponse);
+
+    // when
+    // then
+    mockMvc.perform(get("/people/{personId}/addresses", personId))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(errorResponseJson));
