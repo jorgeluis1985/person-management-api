@@ -10,10 +10,10 @@
 	</parent>
 
 	<groupId>io.github.nataelienai</groupId>
-	<artifactId>user-manager</artifactId>
+	<artifactId>person-management</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>user-manager</name>
-	<description>User Manager API</description>
+	<name>person-management</name>
+	<description>Person Management API</description>
 
 	<properties>
 		<java.version>11</java.version>
